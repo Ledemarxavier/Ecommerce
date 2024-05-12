@@ -3,7 +3,6 @@ using Ecommerce.Infra.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 
 namespace Ecommerce.Web.API.Controllers
 {
@@ -16,17 +15,16 @@ namespace Ecommerce.Web.API.Controllers
     {
         EcommerceDbContext ecommerceDbContext;
 
-
         public ClienteController()
         {
             ecommerceDbContext = new EcommerceDbContext();
         }
 
-
         [HttpGet]
         public List<Cliente> GetClientes()
         {
             return ecommerceDbContext.Clientes.ToList();
+
         }
         [HttpGet("{nome}")]
         public IActionResult GetCliente(string nome)
@@ -46,11 +44,9 @@ namespace Ecommerce.Web.API.Controllers
         {
             ecommerceDbContext.Clientes.Add(cliente);
             ecommerceDbContext.SaveChanges();
-
         }
 
         [HttpPut()]
-
         public IActionResult UpdateCliente([FromBody] Cliente clienteAtualizado)
         {
             var clienteEncontradoNoBanco = ecommerceDbContext.Clientes.First(cliente => cliente.Nome == clienteAtualizado.Nome);
