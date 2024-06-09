@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Domain;
 using Ecommerce.Infra.Data;
+using Ecommerce.Infra.Data.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,23 +13,25 @@ namespace Ecommerce.Web.API.Controllers
     [ApiController]
     public class FuncionarioController : ControllerBase
     {
-        EcommerceDbContext ecommerceDbContext;
+        public FuncionarioRepositorio FuncionarioRepositorio { get; set; }
+
 
         public FuncionarioController()
         {
-            ecommerceDbContext=new EcommerceDbContext();
+            EcommerceDbContext ecommerceDbContext=new EcommerceDbContext();
+            FuncionarioRepositorio = new FuncionarioRepositorio(ecommerceDbContext);
         }
 
         [HttpGet]
         public List<Funcionario> GetFuncionario()
         {
-            return ecommerceDbContext.Funcionarios.ToList();
+            return FuncionarioRepositorio.ListarFuncionarios();
         }
 
         [HttpGet("{nome}")]
         public IActionResult GetFuncionario(string nome)
         {
-            var funcionarioEncontrado = ecommerceDbContext.Funcionarios.First(funcionario => funcionario.Nome == nome);
+            var funcionarioEncontrado = FuncionarioRepositorio.ListarFuncionario(nome);
 
             var funcionarioNaoFoiEncontrado = funcionarioEncontrado is null;
 
@@ -41,15 +44,14 @@ namespace Ecommerce.Web.API.Controllers
         [HttpPost]
         public void CreateFuncionario([FromBody] Funcionario funcionario)
         {
-            ecommerceDbContext.Funcionarios.Add(funcionario);
-            ecommerceDbContext.SaveChanges();
+            FuncionarioRepositorio.CriarFuncionario(funcionario);
 
         }
 
         [HttpPut()]
         public IActionResult UpdateFuncionario([FromBody] Funcionario funcionarioAtualizado)
         {
-            var funcionarioEncontradoNoBanco = ecommerceDbContext.Funcionarios.First(funcionario => funcionario.Nome == funcionarioAtualizado.Nome);
+            var funcionarioEncontradoNoBanco = FuncionarioRepositorio.ListarFuncionario(funcionarioAtualizado.Nome);
 
             var funcionarioNaoFoiEncontrado = funcionarioEncontradoNoBanco is null;
 
@@ -61,26 +63,26 @@ namespace Ecommerce.Web.API.Controllers
             funcionarioEncontradoNoBanco.Email = funcionarioAtualizado.Email;
             funcionarioEncontradoNoBanco.Nivel = funcionarioAtualizado.Nivel;
             funcionarioEncontradoNoBanco.Cargo = funcionarioAtualizado.Cargo;
-            ecommerceDbContext.SaveChanges();
 
-            return Ok(ecommerceDbContext.Funcionarios.First(funcionario => funcionario.Nome == funcionarioAtualizado.Nome));
-            
+            FuncionarioRepositorio.Salva();
+
+            return Ok(FuncionarioRepositorio.ListarFuncionario(funcionarioAtualizado.Nome));
+
         }
 
         [HttpDelete()]
         public IActionResult DeleteFuncionario([FromBody] Funcionario funcionarioParaDeletar)
         {
-            var funcionarioEncontrado = ecommerceDbContext.Funcionarios.First(funcionario => funcionario.Nome == funcionarioParaDeletar.Nome);
+            var funcionarioEncontrado = FuncionarioRepositorio.ListarFuncionario(funcionarioParaDeletar.Nome);
 
             var funcionarioNaoFoiEncontrado = funcionarioEncontrado is null;
 
             if (funcionarioNaoFoiEncontrado)
                 return NotFound();
+            FuncionarioRepositorio.Remover(funcionarioEncontrado);
+           
 
-            ecommerceDbContext.Funcionarios.Remove(funcionarioEncontrado);
-            ecommerceDbContext.SaveChanges();
-
-            return Ok(ecommerceDbContext.Funcionarios);
+            return Ok(FuncionarioRepositorio.ListarFuncionarios());
         }
 
     }
