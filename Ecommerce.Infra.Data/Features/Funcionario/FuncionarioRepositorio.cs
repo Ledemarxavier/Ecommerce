@@ -15,12 +15,12 @@ namespace Ecommerce.Infra.Data.Features
         {
             this.ecommerceDbContext = ecommerceDbContext;
         }
-        public List<Funcionario> ListarFuncionarios()
+        public List<Funcionario> SelecionarFuncionarios()
         {
             return ecommerceDbContext.Funcionarios.ToList();
         }
 
-        public Funcionario ListarFuncionario(string nomeBusca)
+        public Funcionario SelecionarFuncionario(string nomeBusca)
         {
         return ecommerceDbContext.Funcionarios.First(f=>f.Nome== nomeBusca);
         }

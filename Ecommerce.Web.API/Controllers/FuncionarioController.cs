@@ -1,10 +1,9 @@
-﻿using Ecommerce.Domain;
+﻿using Ecommerce.Aplicacao.Features;
+using Ecommerce.Domain;
 using Ecommerce.Infra.Data;
 using Ecommerce.Infra.Data.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
 
 
 namespace Ecommerce.Web.API.Controllers
@@ -13,25 +12,25 @@ namespace Ecommerce.Web.API.Controllers
     [ApiController]
     public class FuncionarioController : ControllerBase
     {
-        public FuncionarioRepositorio FuncionarioRepositorio { get; set; }
-
+        public FuncionarioServico funcionarioServico;
 
         public FuncionarioController()
         {
-            EcommerceDbContext ecommerceDbContext=new EcommerceDbContext();
-            FuncionarioRepositorio = new FuncionarioRepositorio(ecommerceDbContext);
+            EcommerceDbContext ecommerceDbContext = new EcommerceDbContext();
+
+            funcionarioServico = new FuncionarioServico(ecommerceDbContext);
         }
 
         [HttpGet]
-        public List<Funcionario> GetFuncionario()
+        public List<Funcionario> GetFuncionarios()
         {
-            return FuncionarioRepositorio.ListarFuncionarios();
+            return funcionarioServico.SelecionarFuncionarios();
         }
 
         [HttpGet("{nome}")]
         public IActionResult GetFuncionario(string nome)
         {
-            var funcionarioEncontrado = FuncionarioRepositorio.ListarFuncionario(nome);
+            var funcionarioEncontrado = funcionarioServico.SelecionarFuncionario(nome);
 
             var funcionarioNaoFoiEncontrado = funcionarioEncontrado is null;
 
@@ -44,46 +43,31 @@ namespace Ecommerce.Web.API.Controllers
         [HttpPost]
         public void CreateFuncionario([FromBody] Funcionario funcionario)
         {
-            FuncionarioRepositorio.CriarFuncionario(funcionario);
-
+            funcionarioServico.CriarFuncionario(funcionario);
         }
 
         [HttpPut()]
         public IActionResult UpdateFuncionario([FromBody] Funcionario funcionarioAtualizado)
         {
-            var funcionarioEncontradoNoBanco = FuncionarioRepositorio.ListarFuncionario(funcionarioAtualizado.Nome);
+            Funcionario funcionarioAtualizadoDoBanco = funcionarioServico.AtualizarFuncionario(funcionarioAtualizado);
 
-            var funcionarioNaoFoiEncontrado = funcionarioEncontradoNoBanco is null;
-
-            if (funcionarioNaoFoiEncontrado)
-                return NotFound();
-
-            funcionarioEncontradoNoBanco.Nome = funcionarioAtualizado.Nome;
-            funcionarioEncontradoNoBanco.Senha = funcionarioAtualizado.Senha;
-            funcionarioEncontradoNoBanco.Email = funcionarioAtualizado.Email;
-            funcionarioEncontradoNoBanco.Nivel = funcionarioAtualizado.Nivel;
-            funcionarioEncontradoNoBanco.Cargo = funcionarioAtualizado.Cargo;
-
-            FuncionarioRepositorio.Salva();
-
-            return Ok(FuncionarioRepositorio.ListarFuncionario(funcionarioAtualizado.Nome));
-
+            return Ok(funcionarioAtualizadoDoBanco);
         }
 
-        [HttpDelete()]
-        public IActionResult DeleteFuncionario([FromBody] Funcionario funcionarioParaDeletar)
-        {
-            var funcionarioEncontrado = FuncionarioRepositorio.ListarFuncionario(funcionarioParaDeletar.Nome);
+        //[HttpDelete()]
+        //public IActionResult DeleteFuncionario([FromBody] Funcionario funcionarioParaDeletar)
+        //{
+        //    var funcionarioEncontrado = FuncionarioRepositorio.ListarFuncionario(funcionarioParaDeletar.Nome);
 
-            var funcionarioNaoFoiEncontrado = funcionarioEncontrado is null;
+        //    var funcionarioNaoFoiEncontrado = funcionarioEncontrado is null;
 
-            if (funcionarioNaoFoiEncontrado)
-                return NotFound();
-            FuncionarioRepositorio.Remover(funcionarioEncontrado);
-           
+        //    if (funcionarioNaoFoiEncontrado)
+        //        return NotFound();
+        //    FuncionarioRepositorio.Remover(funcionarioEncontrado);
 
-            return Ok(FuncionarioRepositorio.ListarFuncionarios());
-        }
+
+        //    return Ok(FuncionarioRepositorio.SelecionarFuncionarios());
+        //}
 
     }
 }
